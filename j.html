@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STANDARD CREATIONS - Next Generation Development</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&display=swap" rel="stylesheet">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+      background: #000000;
+    }
+
+    #canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .content {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .view {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 100%;
+      max-width: 1200px;
+      padding: 0 20px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .view.active {
+      display: flex;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .intro-section {
+      animation: fadeInUp 1.2s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 8px 20px;
+      background: rgba(153, 0, 255, 0.15);
+      border: 1px solid rgba(153, 0, 255, 0.3);
+      border-radius: 30px;
+      color: #d400ff;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 30px;
+      backdrop-filter: blur(10px);
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 68px;
+      font-weight: 900;
+      margin-bottom: 5px;
+      /* Fantastic Red to Blue Gradient */
+      background: linear-gradient(135deg, #ff0033 0%, #0066ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      /* Purple glow to bridge the red and blue */
+      filter: drop-shadow(0px 4px 15px rgba(153, 0, 255, 0.4));
+    }
+
+    .founders {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 16px;
+      color: #ff0033;
+      letter-spacing: 3px;
+      margin-bottom: 35px;
+      text-transform: uppercase;
+      opacity: 0.9;
+    }
+
+    .subtitle {
+      font-size: 22px;
+      color: rgba(255, 255, 255, 0.85);
+      margin: 0 auto 50px auto;
+      max-width: 700px;
+      line-height: 1.6;
+      font-weight: 400;
+      text-align: center;
+    }
+
+    .subtitle strong {
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    /* Categories View Styles */
+    .categories-header {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 34px;
+      color: #fff;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      /* Fantastic Red to Blue Gradient */
+      background: linear-gradient(135deg, #ff0033 0%, #0066ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .categories-sub {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 15px;
+      margin-bottom: 25px;
+    }
+
+    .categories-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      width: 100%;
+      max-width: 1150px;
+      max-height: 55vh;
+      overflow-y: auto;
+      padding-right: 8px;
+      margin-bottom: 25px;
+    }
+
+    .categories-grid::-webkit-scrollbar,
+    .lead-form-container::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .categories-grid::-webkit-scrollbar-track,
+    .lead-form-container::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 3px;
+    }
+
+    .categories-grid::-webkit-scrollbar-thumb,
+    .lead-form-container::-webkit-scrollbar-thumb {
+      background: rgba(153, 0, 255, 0.3);
+      border-radius: 3px;
+    }
+
+    .category-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(153, 0, 255, 0.2);
+      border-radius: 12px;
+      padding: 22px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .category-card:hover {
+      background: rgba(153, 0, 255, 0.08);
+      border-color: #a200ff;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(153, 0, 255, 0.15);
+    }
+
+    .category-card h3 {
+      font-family: 'Orbitron', sans-serif;
+      color: #fff;
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+
+    .category-card p {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    /* Form View Styles */
+    .lead-form-container {
+      width: 100%;
+      max-width: 650px;
+      background: rgba(10, 15, 25, 0.7);
+      border: 1px solid rgba(153, 0, 255, 0.3);
+      border-radius: 16px;
+      padding: 30px;
+      backdrop-filter: blur(15px);
+      max-height: 70vh;
+      overflow-y: auto;
+      text-align: left;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      color: #00aaff;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #ff0033;
+      background: rgba(255, 0, 51, 0.05);
+      box-shadow: 0 0 15px rgba(255, 0, 51, 0.2);
+    }
+
+    .form-group select option {
+      background: #000;
+      color: #fff;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 25px;
+    }
+
+    .cta-buttons {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 14px 30px;
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn-primary {
+      /* Fantastic Red to Blue Gradient */
+      background: linear-gradient(135deg, #ff0033 0%, #0066ff 100%);
+      color: #ffffff;
+      box-shadow: 0 0 20px rgba(153, 0, 255, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 40px rgba(153, 0, 255, 0.6);
+    }
+
+    .btn-back {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 12px 25px;
+      font-size: 13px;
+    }
+
+    .btn-back:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .scroll-indicator {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 12px;
+      animation: bounce 2s infinite;
+      z-index: 10;
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateX(-50%) translateY(0);
+        opacity: 0.5;
+      }
+      50% {
+        transform: translateX(-50%) translateY(10px);
+        opacity: 1;
+      }
+    }
+
+    .scroll-indicator div {
+      display: block;
+      font-size: 20px;
+    }
+
+    @media (max-width: 1024px) {
+      .categories-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 38px;
+        letter-spacing: 2px;
+      }
+      
+      .founders {
+        font-size: 12px;
+        letter-spacing: 1px;
+      }
+
+      .subtitle {
+        font-size: 16px;
+      }
+
+      .categories-grid {
+        grid-template-columns: 1fr;
+        max-height: 55vh;
+      }
+
+      .lead-form-container {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <div class="content">
+    <!-- Home View -->
+    <div id="home-view" class="view active">
+      <div class="intro-section">
+        <div class="badge">Welcome to the future</div>
+        
+        <h1>STANDARD CREATIONS</h1>
+        <div class="founders">( by Maddy group )</div>
+        
+        <p class="subtitle">
+          We craft striking, <strong>high-performance websites</strong> engineered to capture attention, dominate your market, and turn visitors into <strong>loyal customers</strong>.
+        </p>
+        
+        <div class="cta-buttons">
+          <button class="btn-primary" id="start-btn">Start Your Project</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Categories Interface View -->
+    <div id="categories-view" class="view">
+      <div class="categories-header">Select Your Industry</div>
+      <div class="categories-sub">Choose your domain to build your custom high-impact web solution</div>
+      
+      <div class="categories-grid">
+        <div class="category-card" onclick="openForm('Cafes & Restaurants')">
+          <h3>Cafes & Restaurants</h3>
+          <p>Menus, online reservations, brand identity, and mouth-watering layouts.</p>
+        </div>
+        <div class="category-card" onclick="openForm('E-Commerce & Retail')">
+          <h3>E-Commerce & Retail</h3>
+          <p>High-converting stores, secure checkouts, and sleek product displays.</p>
+        </div>
+        <div class="category-card" onclick="openForm('Portfolios & Creators')">
+          <h3>Portfolios & Creators</h3>
+          <p>Stunning personal branding to showcase your work and attract high-paying clients.</p>
+        </div>
+        <div class="category-card" onclick="openForm('Corporate & Business')">
+          <h3>Corporate & Business</h3>
+          <p>Professional authority sites built to gain trust and scale your operations.</p>
+        </div>
+        <div class="category-card" onclick="openForm('Fitness & Gyms')">
+          <h3>Fitness & Gyms</h3>
+          <p>Dynamic schedules, membership portals, and high-energy branding.</p>
+        </div>
+        <div class="category-card" onclick="openForm('Real Estate & Services')">
+          <h3>Real Estate & Services</h3>
+          <p>Lead generation engines designed to capture leads and close deals faster.</p>
+        </div>
+        <div class="category-card" onclick="openForm('Healthcare & Clinics')">
+          <h3>Healthcare & Clinics</h3>
+          <p>Patient portals, appointment booking, and trustworthy medical layouts.</p>
+        </div>
+        <div class="category-card" onclick="openForm('Education & E-Learning')">
+          <h3>Education & E-Learning</h3>
+          <p>Course platforms, student dashboards, and interactive learning hubs.</p>
+        </div>
+        <div class="category-card" onclick="openForm('Travel & Hospitality')">
+          <h3>Travel & Hospitality</h3>
+          <p>Booking systems, destination galleries, and tour package listings.</p>
+        </div>
+        <div class="category-card" onclick="openForm('Tech Startups & SaaS')">
+          <h3>Tech Startups & SaaS</h3>
+          <p>Modern landing pages, feature highlights, and user onboarding flows.</p>
+        </div>
+        <div class="category-card" onclick="openForm('Events & Entertainment')">
+          <h3>Events & Entertainment</h3>
+          <p>Ticketing integration, schedule layouts, and hype-building visuals.</p>
+        </div>
+        <div class="category-card" onclick="openForm('Blogs & Media Hubs')">
+          <h3>Blogs & Media Hubs</h3>
+          <p>Content-heavy layouts, fast-loading articles, and subscriber growth tools.</p>
+        </div>
+      </div>
+
+      <button class="btn-back" id="back-to-home">← Back to Home</button>
+    </div>
+
+    <!-- Lead Capture Form View -->
+    <div id="form-view" class="view">
+      <div class="categories-header" id="form-title">Project Intake Form</div>
+      <div class="categories-sub" id="form-category-label">Custom Solution Setup</div>
+      
+      <div class="lead-form-container">
+        <form id="project-form" onsubmit="handleFormSubmit(event)">
+          <div class="form-group">
+            <label>1. Your Full Name</label>
+            <input type="text" id="fieldName" required placeholder="e.g., Maddy Group">
+          </div>
+          
+          <div class="form-group">
+            <label>2. Business or Brand Name</label>
+            <input type="text" id="fieldBusiness" required placeholder="e.g., 3 Idiot's Cafe">
+          </div>
+          
+          <div class="form-group">
+            <label>3. Best Contact Email or Phone</label>
+            <input type="text" id="fieldContact" required placeholder="e.g., contact@yourdomain.com / +123456789">
+          </div>
+          
+          <div class="form-group">
+            <label>4. Estimated Project Budget</label>
+            <select id="fieldBudget" required>
+              <option value="" disabled selected>Select investment range</option>
+              <option value="Starter">Starter Package</option>
+              <option value="Growth">Growth & Scale Package</option>
+              <option value="Enterprise">Enterprise Custom Solution</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>5. What is your primary goal for this website?</label>
+            <textarea id="fieldGoal" rows="3" required placeholder="Tell us what you want to achieve or feature..."></textarea>
+          </div>
+          
+          <div class="form-actions">
+            <button type="button" class="btn-back" id="back-to-categories">← Back to Categories</button>
+            <button type="submit" class="btn-primary">Connect via WhatsApp</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-indicator">
+    <span>Scroll to explore</span>
+    <div>↓</div>
+  </div>
+
+  <script>
+    const homeView = document.getElementById('home-view');
+    const categoriesView = document.getElementById('categories-view');
+    const formView = document.getElementById('form-view');
+    
+    const startBtn = document.getElementById('start-btn');
+    const backToHomeBtn = document.getElementById('back-to-home');
+    const backToCategoriesBtn = document.getElementById('back-to-categories');
+    
+    const formCategoryLabel = document.getElementById('form-category-label');
+    let selectedCategoryName = '';
+
+    startBtn.addEventListener('click', () => {
+      homeView.classList.remove('active');
+      categoriesView.classList.add('active');
+    });
+
+    backToHomeBtn.addEventListener('click', () => {
+      categoriesView.classList.remove('active');
+      homeView.classList.add('active');
+    });
+
+    backToCategoriesBtn.addEventListener('click', () => {
+      formView.classList.remove('active');
+      categoriesView.classList.add('active');
+    });
+
+    function openForm(categoryName) {
+      selectedCategoryName = categoryName;
+      formCategoryLabel.textContent = `Configuring solution for: ${categoryName}`;
+      categoriesView.classList.remove('active');
+      formView.classList.add('active');
+    }
+
+    function handleFormSubmit(event) {
+      event.preventDefault();
+      
+      const name = document.getElementById('fieldName').value;
+      const business = document.getElementById('fieldBusiness').value;
+      const contact = document.getElementById('fieldContact').value;
+      const budget = document.getElementById('fieldBudget').value;
+      const goal = document.getElementById('fieldGoal').value;
+      
+      const message = `Hello! I want to build a website.%0A%0A*Category:* ${encodeURIComponent(selectedCategoryName)}%0A*Name:* ${encodeURIComponent(name)}%0A*Business:* ${encodeURIComponent(business)}%0A*Contact:* ${encodeURIComponent(contact)}%0A*Budget:* ${encodeURIComponent(budget)}%0A*Goal:* ${encodeURIComponent(goal)}`;
+      
+      const phoneNumber = "923109731028";
+      const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+      
+      // Using location.href ensures mobile and desktop browsers don't block the redirect as a popup
+      window.location.href = whatsappUrl;
+    }
+
+    const canvas = document.getElementById('canvas');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x000407, 0.1);
+    camera.position.z = 40;
+
+    function createDotTexture() {
+      const dotCanvas = document.createElement('canvas');
+      dotCanvas.width = 64;
+      dotCanvas.height = 64;
+      const ctx = dotCanvas.getContext('2d');
+      ctx.beginPath();
+      ctx.arc(32, 32, 30, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+      return new THREE.CanvasTexture(dotCanvas);
+    }
+
+    const roundDotTexture = createDotTexture();
+
+    const particleCount = 2000;
+    const particleGeometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+
+    const particles = [];
+
+    for (let i = 0; i < particleCount; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 40 + Math.random() * 20;
+      const height = (Math.random() - 0.5) * 80;
+      
+      positions[i * 3] = Math.cos(angle) * radius;
+      positions[i * 3 + 1] = height;
+      positions[i * 3 + 2] = Math.sin(angle) * radius;
+      
+      const hue = Math.random();
+      const rgb = hslToRgb(hue, 1, 0.5);
+      colors[i * 3] = rgb[0];
+      colors[i * 3 + 1] = rgb[1];
+      colors[i * 3 + 2] = rgb[2];
+      
+      particles.push({
+        angle: angle,
+        radius: radius,
+        height: height,
+        speed: Math.random() * 0.5 + 0.2,
+        hue: hue
+      });
+    }
+
+    particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    const particleMaterial = new THREE.PointsMaterial({
+      size: 0.35, 
+      sizeAttenuation: true,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.8,
+      map: roundDotTexture, 
+      alphaTest: 0.5,       
+      depthWrite: false     
+    });
+
+    const particleSystem = new THREE.Points(particleGeometry, particleMaterial);
+    scene.add(particleSystem);
+
+    function hslToRgb(h, s, l) {
+      let r, g, b;
+      if (s === 0) {
+        r = g = b = l;
+      } else {
+        const hue2rgb = (p, q, t) => {
+          if (t < 0) t += 1;
+          if (t > 1) t -= 1;
+          if (t < 1/6) return p + (q - p) * 6 * t;
+          if (t < 1/2) return q;
+          if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+          return p;
+        };
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+      }
+      return [r, g, b];
+    }
+
+    let time = 0;
+
+    function animate() {
+      requestAnimationFrame(animate);
+      time += 0.01;
+      
+      const positions = particleGeometry.attributes.position.array;
+      const colors = particleGeometry.attributes.color.array;
+      
+      for (let i = 0; i < particleCount; i++) {
+        const p = particles[i];
+        
+        p.radius -= p.speed * 0.15;
+        p.height -= p.speed * 0.3;
+        p.angle += p.speed * 0.05;
+        
+        if (p.radius < 5) {
+          p.angle = Math.random() * Math.PI * 2;
+          p.radius = 40 + Math.random() * 20;
+          p.height = (Math.random() - 0.5) * 80;
+          p.speed = Math.random() * 0.5 + 0.2;
+        }
+        
+        positions[i * 3] = Math.cos(p.angle) * p.radius;
+        positions[i * 3 + 1] = p.height;
+        positions[i * 3 + 2] = Math.sin(p.angle) * p.radius;
+        
+        const colorHue = (p.hue + time * 0.3) % 1;
+        const rgb = hslToRgb(colorHue, 1, 0.5);
+        colors[i * 3] = rgb[0];
+        colors[i * 3 + 1] = rgb[1];
+        colors[i * 3 + 2] = rgb[2];
+      }
+      
+      particleGeometry.attributes.position.needsUpdate = true;
+      particleGeometry.attributes.color.needsUpdate = true;
+      
+      scene.rotation.y += 0.0003;
+      
+      renderer.render(scene, camera);
+    }
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    animate();
+  </script>
+</body>
+</html>
